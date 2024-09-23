@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@font-face {
+    font-family: 'visbycf';
+    src: url("./visbycf-regular.otf") format("opentype");
+}
+
+@font-face {
+    font-family: 'visbycf';
+    font-weight: bold;
+    src: url("./visbycf-bold.otf") format("opentype");
+}
+
+@font-face {
+    font-family: 'visbycf';
+    font-weight: 500;
+    src: url("./visbycf-medium.otf") format("opentype");
+}
+
+body {
+    font-family: 'Geist';
+}
+
+/* Geist Font */
+@font-face {
+    font-family: 'Geist';
+    src: url("./geist/Geist-Black.otf") format("opentype");
+}
+
+@font-face {
+    font-family: 'Gesit';
+    font-weight: bold;
+    src: url("./geist/Geist-Bold.otf") format("opentype");
+}
+
+@font-face {
+    font-family: 'Gesit';
+    font-weight: 500;
+    src: url("./geist/Geist-Light.otf") format("opentype");
+}
+
+@font-face {
+    font-family: 'Gesit';
+    font-weight: 500;
+    src: url("./geist/Geist-Medium.otf") format("opentype");
+}
+
+@font-face {
+    font-family: 'Geist';
+    src: url("./geist/Geist-Regular.otf") format("opentype");
+}
+
+@font-face {
+    font-family: 'Gesit';
+    font-weight: bold;
+    src: url("./geist/Geist-SemiBold.otf") format("opentype");
+}
+
+@font-face {
+    font-family: 'Gesit';
+    font-weight: bold;
+    src: url("./geist/Geist-Thin.otf") format("opentype");
+}
+
+@font-face {
+    font-family: 'Gesit';
+    font-weight: bold;
+    src: url("./geist/Geist-UltraBlack.otf") format("opentype");
+}
+
+@font-face {
+    font-family: 'Gesit';
+    font-weight: bold;
+    src: url("./geist/Geist-UltraLight.otf") format("opentype");
+}
+
+
+a.navLink.active {
+ background-color: black;
+ color: white;
+ stroke: white;
+}
