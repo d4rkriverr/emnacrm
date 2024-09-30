@@ -9,7 +9,8 @@ interface UserAccount {
 interface UserHookModel {
     isAuthed: boolean;
     user: UserAccount | null;
-    userLogin: (username: string, password: string) => Promise<unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    userLogin: (username: string, password: string) => Promise<any>;
     userLogout: () => void;
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
