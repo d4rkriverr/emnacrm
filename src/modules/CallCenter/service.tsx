@@ -2,7 +2,7 @@ import { configs } from "../../constants";
 
 const getCallsData = async (currentDate: Date) => {
     const filterDate = currentDate.toLocaleDateString().replace(new RegExp("/", 'g'), "-")
-    const endpoint = 'http://localhost:8080/api/v2/calls/all?d=' + filterDate.split("-").reverse().join("-");
+    const endpoint = 'http://emnaservices.online/api/v2/calls/all?d=' + filterDate.split("-").reverse().join("-");
     const token = localStorage.getItem(configs.TOKEN_NAME);
     if (token == "" || token == null) return null;
 
@@ -23,7 +23,7 @@ const getCallsData = async (currentDate: Date) => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const addNewCall = async (val: any) => {
-    const endpoint = 'http://localhost:8080/api/v2/calls/create';
+    const endpoint = 'http://emnaservices.online/api/v2/calls/create';
     const token = localStorage.getItem(configs.TOKEN_NAME);
     if (token == "" || token == null) return { success: false, message: "unauthorized access" };
 
