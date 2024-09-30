@@ -1,66 +1,71 @@
-import { FormEvent, useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { FormEvent, useEffect, useState } from "react";
 import { Navigate, NavLink, useOutlet } from "react-router-dom";
-import { icons } from "../constants";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
+import { service } from "./service";
 
 
-export default function ProtectedLayout() {
+
+export default function MainLayout() {
     const outlet = useOutlet();
-    const { isAuthed } = useAuth();
-
+    const { isAuthed, user, userLogout } = useAuth();
     const [openWSModel, setOpenWSModel] = useState(false);
 
-    const [menuItems] = useState([
-        { name: "Overview", icon: icons.overview, link: '/dashboard/overview' },
-        { name: "Employees", icon: icons.groups, link: '/dashboard/employees' },
-        { name: "Expenses", icon: icons.expanses, link: '/dashboard/expenses' },
-        { name: "documents", icon: icons.overview, link: '/dashboard/documents' }
-    ])
-    const [workspace] = useState([
-        { name: "Poland", icon: icons.country },
-        { name: "Romania", icon: icons.country },
-        { name: "Malta", icon: icons.country }
-    ])
+    const [menuItems, setMenuItems] = useState<any[]>([])
+    const [workspace, setWorkspace] = useState<any[]>([])
+
+    useEffect(() => { initialState() }, [])
+
+    const initialState = async () => {
+        const r = await service.GetLinks()
+        setMenuItems(r)
+        const e = await service.GetWorkspaces()
+        setWorkspace(e)
+    }
+
 
     const onAddWorkspace = (obj: unknown) => {
         console.log(obj);
-
     }
+
     if (!isAuthed) return <Navigate to="/" />;
     return (
         <div className={`flex w-screen h-screen`} >
             {/* SIDE BAR */}
-            <div className="w-72 border-r-2 flex flex-col">
-                <div className="flex items-center justify-center p-3 h-16">
-                    <button className="flex justify-between items-center p-2 w-full hover:outline outline-2 outline-blue-400 border rounded-md">
-                        <span className="flex justify-between items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5">
-                                <path d="M18 21a8 8 0 0 0-16 0"></path>
-                                <circle cx="10" cy="8" r="5"></circle>
-                                <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"></path>
-                            </svg>
-                            <span className="text-sm">Hamza</span>
-                        </span>
-                    </button>
+            <div className="relative w-72">
+                <div className="fixed w-72 h-full border-r-2 flex flex-col">
+                    <div className="flex items-center justify-center p-3 h-16">
+                        <button className="flex justify-between items-center p-2 w-full border-2 border-blue-400 rounded-md">
+                            <span className="flex justify-between items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5">
+                                    <path d="M18 21a8 8 0 0 0-16 0"></path>
+                                    <circle cx="10" cy="8" r="5"></circle>
+                                    <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"></path>
+                                </svg>
+                                <span className="text-s font-bold">Hi, {user?.username}</span>
+                            </span>
+                        </button>
+                    </div>
+                    <div className="flex-1 flex flex-col py-3 border-y-2 p-3">
+                        <MenuTab data={menuItems} />
+                        <WorkspaceTab canCreate={false} data={workspace} onOpenCreate={() => setOpenWSModel(true)} />
+                    </div>
+                    <div className="p-3">
+                        <button onClick={userLogout} className="flex justify-center items-center p-3 w-full bg-black border rounded-md">
+                            <span className="text-white text-sm font-bold">logout</span>
+                        </button>
+                    </div>
                 </div>
-                <div className="flex-1 flex flex-col py-3 border-y-2 p-3">
-                    <MenuTab data={menuItems} />
-                    <WorkspaceTab data={workspace} onOpenCreate={() => setOpenWSModel(true)} />
-                </div>
-                <div className="p-3">
-                    <button className="flex justify-center items-center p-3 w-full bg-black border rounded-md">
-                        <span className="text-white text-sm font-bold">logout</span>
-                    </button>
-                </div>
+
+
             </div>
-            <div className="flex-1">{outlet}</div>
+            <div className="flex-1 overflow-auto">{outlet}</div>
             <AddWorkspaceModel isOpen={openWSModel} onSave={onAddWorkspace} onClose={() => setOpenWSModel(false)} />
         </div>
     )
 }
 
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MenuTab = ({ data }: any) => {
     return (
         <div data-collapsed="false" className="group flex flex-col">
@@ -78,19 +83,20 @@ const MenuTab = ({ data }: any) => {
     )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const WorkspaceTab = ({ data, onOpenCreate }: any) => {
+const WorkspaceTab = ({ canCreate, data, onOpenCreate }: any) => {
     return (
         <div className="group flex flex-col">
             <div className="flex flex-col font-medium">
                 <div className="flex items-center select-none py-2">
                     <p className="flex-1 text-sm text-gray-500 mx-1 font-bold">WORKSPACE</p>
-                    <button onClick={onOpenCreate} className="stroke-black hover:stroke-white hover:bg-black">
-                        <svg className="w-6 h-6" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000">
-                            <path d="M9 12H12M15 12H12M12 12V9M12 12V15" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                            <path d="M21 3.6V20.4C21 20.7314 20.7314 21 20.4 21H3.6C3.26863 21 3 20.7314 3 20.4V3.6C3 3.26863 3.26863 3 3.6 3H20.4C20.7314 3 21 3.26863 21 3.6Z" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                        </svg>
-                    </button>
+                    {
+                        <button disabled={!canCreate} onClick={onOpenCreate} className=" stroke-black hover:stroke-blue-400 disabled:stroke-gray-400">
+                            <svg className="w-6 h-6" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000">
+                                <path d="M9 12H12M15 12H12M12 12V9M12 12V15" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+                                <path d="M21 3.6V20.4C21 20.7314 20.7314 21 20.4 21H3.6C3.26863 21 3 20.7314 3 20.4V3.6C3 3.26863 3.26863 3 3.6 3H20.4C20.7314 3 21 3.26863 21 3.6Z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+                            </svg>
+                        </button>
+                    }
                 </div>
                 <nav className="text-sm data-[hidden=true]:hidden bg-gray-50">
                     {data.map((x: { name: string; icon: JSX.Element }) => {
@@ -107,7 +113,6 @@ const WorkspaceTab = ({ data, onOpenCreate }: any) => {
     )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const AddWorkspaceModel = ({ isOpen, onSave, onClose }: { isOpen: boolean, onSave: any, onClose: any }) => {
     const [state, setState] = useState({ isLoad: false, message: "" })
     const onSubmit = async (e: FormEvent<HTMLFormElement>) => {

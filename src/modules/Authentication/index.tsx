@@ -4,14 +4,15 @@ import { useAuth } from "../../hooks/useAuth";
 export default function Authentication() {
     const [state, setState] = useState({ isLoad: false, message: "" })
     const { userLogin } = useAuth();
+
     const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (state.isLoad) return
         setState({ isLoad: true, message: "" })
         const o = Object.fromEntries(new FormData(e.currentTarget))
         const r = await userLogin(o.username.toString(), o.password.toString())
-        if (r != null) {
-            setState({ isLoad: false, message: "invalid credentials" })
+        if (r.success == false) {
+            setState({ isLoad: false, message: r.message })
         }
     }
     return (
@@ -20,6 +21,7 @@ export default function Authentication() {
                 <h2 className="LoginTitle my-0 mx-auto font-sans text-3xl font-bold">LOGIN.</h2>
                 <hr />
                 <div className="flex flex-col gap-3">
+                    <p className="text-red-500 text-center">{state.message}</p>
                     <div className="flex flex-col gap-1">
                         <label className="text-sm">Username:</label>
                         <input
@@ -43,14 +45,13 @@ export default function Authentication() {
                         <input disabled={state.isLoad} type="checkbox" />
                         <label className="text-sm">Remember me</label>
                     </div>
-                    <p className="text-red-500 text-center">{state.message}</p>
                     <button disabled={state.isLoad} className="bg-black disabled:bg-black/70 text-white py-3 font-bold rounded-lg">
                         {state.isLoad ? "please wait ...." : "Sign in"}
                     </button>
                 </div>
 
                 <hr />
-                <p className="text-center font-bold text-xs">powerd by engima</p>
+                <p className="text-center font-bold text-xs">powerd by devops</p>
             </form>
         </div>
     )
