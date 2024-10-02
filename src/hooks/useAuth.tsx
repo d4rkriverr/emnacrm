@@ -29,10 +29,9 @@ export const AuthProvider = () => {
     useEffect(() => { userInfo() }, [])
 
     const userInfo = async () => {
-        const endpoint = 'http://emnaservices.online/api/v2/account/info';
+        const endpoint = `${configs.API_URI}/api/v2/account/info`;
         const token = localStorage.getItem(configs.TOKEN_NAME);
         if (token == "" || token == null) return setIsLoad(false)
-
         try {
             const response = await fetch(endpoint, {
                 method: 'GET',
@@ -51,7 +50,7 @@ export const AuthProvider = () => {
     }
 
     const userLogin = async (username: string, password: string) => {
-        const endpoint = 'http://emnaservices.online/api/v2/account/auth';
+        const endpoint = `${configs.API_URI}/api/v2/account/auth`;
         try {
             const response = await fetch(endpoint, {
                 method: 'POST',

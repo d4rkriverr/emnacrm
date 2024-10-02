@@ -1,7 +1,8 @@
 import { ChangeEvent, useEffect, useState } from "react"
-import { service } from "./service"
 import { icons } from "../../constants"
-import AddCallModel from "./call_view"
+import { AddCallModel, EditCallModel, Pagination } from "./component"
+import { callService } from "../../hooks/call_log_service";
+import Popover from "../../components/popover";
 
 
 interface CallLog {
@@ -23,6 +24,7 @@ export default function CallCenter() {
     const [state, setState] = useState({ isLoad: true, message: "" });
     const [openAddModel, setOpenAddModel] = useState(false);
 
+    const [editControl, setEditControl] = useState<{ isOpen: boolean, data: CallLog | null }>({ isOpen: false, data: null })
     const [currentDate, setCurrentDate] = useState((new Date()))
     const [currentPage, setCurrentPage] = useState({ page: 0, start: 0, end: 10 })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,7 +34,7 @@ export default function CallCenter() {
 
     const initialState = async (currentDate: Date) => {
         setState({ isLoad: true, message: "" })
-        const r = await service.getCallsData(currentDate)
+        const r = await callService.getAllCalls(currentDate.toLocaleDateString())
         setCurrentPage({ page: 0, start: 0, end: 10 })
         setCalls(r)
         setState({ isLoad: false, message: "" })
@@ -51,8 +53,16 @@ export default function CallCenter() {
         setCurrentDate(d);
         initialState(d);
     }
+
     const onAdd = async (val: CallLog) => {
-        const r = await service.addNewCall(val)
+        const r = await callService.addNewCall(val)
+        if (r.success) {
+            initialState(currentDate);
+        }
+        return r;
+    }
+    const onEdit = async (e: CallLog) => {
+        const r = await callService.editCall(e)
         if (r.success) {
             initialState(currentDate);
         }
@@ -87,8 +97,8 @@ export default function CallCenter() {
                                         <th className="h-10 px-2 text-left align-middle"><div>ID</div></th>
                                         <th className="h-10 px-2 text-left align-middle"><div>C.I.N</div></th>
                                         <th className="h-10 px-2 text-left align-middle"><div>Personal info</div></th>
-                                        <th className="h-10 px-2 text-left align-middle"><div>Requested job</div></th>
                                         <th className="h-10 px-2 text-left align-middle"><div>Requested Country</div></th>
+                                        <th className="h-10 px-2 text-left align-middle"><div>Requested job</div></th>
                                         <th className="h-10 w-max px-2 text-left align-middle"><div>Notes</div></th>
                                         <th className="h-10 px-2 text-left align-middle"><div>Call Status</div></th>
                                         <th className="h-10 px-2 text-left align-middle"><div>Platform</div></th>
@@ -122,16 +132,18 @@ export default function CallCenter() {
                                                     <td className="p-2 align-middle"><p className="text-xs">{dateFormat}</p></td>
                                                     <td className="p-2 align-middle"><span className="font-bold">{e.agent}</span></td>
                                                     <td className="p-2 align-middle text-center">
-                                                        <button
-                                                            className="items-center justify-center whitespace-nowrap rounded-md text-sm font-medium hover:bg-gray-100 hover:border-2 flex h-8 w-8 p-0"
-                                                            type="button" id="radix-:r4f:" aria-haspopup="menu" aria-expanded="false" data-state="closed">
-                                                            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"
-                                                                className="h-4 w-4">
-                                                                <path
-                                                                    d="M3.625 7.5C3.625 8.12132 3.12132 8.625 2.5 8.625C1.87868 8.625 1.375 8.12132 1.375 7.5C1.375 6.87868 1.87868 6.375 2.5 6.375C3.12132 6.375 3.625 6.87868 3.625 7.5ZM8.625 7.5C8.625 8.12132 8.12132 8.625 7.5 8.625C6.87868 8.625 6.375 8.12132 6.375 7.5C6.375 6.87868 6.87868 6.375 7.5 6.375C8.12132 6.375 8.625 6.87868 8.625 7.5ZM12.5 8.625C13.1213 8.625 13.625 8.12132 13.625 7.5C13.625 6.87868 13.1213 6.375 12.5 6.375C11.8787 6.375 11.375 6.87868 11.375 7.5C11.375 8.12132 11.8787 8.625 12.5 8.625Z"
-                                                                    fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
-                                                            </svg>
-                                                        </button>
+                                                        <Popover content={<PopoverContent onEdit={() => setEditControl({ isOpen: true, data: e })} />}>
+                                                            <button
+                                                                className="items-center justify-center whitespace-nowrap rounded-md text-sm font-medium hover:bg-gray-100 hover:border-2 flex h-8 w-8 p-0"
+                                                                type="button" id="radix-:r4f:" aria-haspopup="menu" aria-expanded="false" data-state="closed">
+                                                                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"
+                                                                    className="h-4 w-4">
+                                                                    <path
+                                                                        d="M3.625 7.5C3.625 8.12132 3.12132 8.625 2.5 8.625C1.87868 8.625 1.375 8.12132 1.375 7.5C1.375 6.87868 1.87868 6.375 2.5 6.375C3.12132 6.375 3.625 6.87868 3.625 7.5ZM8.625 7.5C8.625 8.12132 8.12132 8.625 7.5 8.625C6.87868 8.625 6.375 8.12132 6.375 7.5C6.375 6.87868 6.87868 6.375 7.5 6.375C8.12132 6.375 8.625 6.87868 8.625 7.5ZM12.5 8.625C13.1213 8.625 13.625 8.12132 13.625 7.5C13.625 6.87868 13.1213 6.375 12.5 6.375C11.8787 6.375 11.375 6.87868 11.375 7.5C11.375 8.12132 11.8787 8.625 12.5 8.625Z"
+                                                                        fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
+                                                                </svg>
+                                                            </button>
+                                                        </Popover>
                                                     </td>
                                                 </tr>
                                             )
@@ -144,34 +156,17 @@ export default function CallCenter() {
                     </div>
                 </div>
                 <AddCallModel data={calls} isOpen={openAddModel} onAdd={onAdd} onExit={() => setOpenAddModel(false)} />
+                <EditCallModel data={calls} old={editControl.data} onExit={() => setEditControl({ isOpen: false, data: null })} onEdit={onEdit} isOpen={editControl.isOpen} />
             </div>
         )
 }
 
-
-function Pagination({ onChange, arrLength, startAt, pageSize }: { onChange: (index: number) => void, arrLength: number, startAt: number, pageSize: number }) {
-    const PageNubmer = (Math.ceil(arrLength / pageSize));
-    const [currentPage, setCurrentPage] = useState(startAt);
-    const [endEntities, setEndEntities] = useState(pageSize)
-    const onPageChange = (i: number) => {
-        setCurrentPage(i)
-        onChange(i)
-        const x = (i * pageSize) + pageSize
-        setEndEntities(x > arrLength ? arrLength : x)
-    }
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const PopoverContent = ({ onEdit }: any) => {
     return (
-        <div className="flex justify-between py-3">
-            <div className="text-sm">
-                <p>Showing <b>{(currentPage * pageSize) + 1}</b> to <b>{endEntities}</b> of <b>{arrLength}</b> entries.</p>
-            </div>
-            <div className="flex gap-1">
-                {Array.from(Array(PageNubmer).keys()).map((e) => {
-                    return (
-                        <button data-state={currentPage == e} onClick={() => onPageChange(e)} className="w-9 h-9 rounded data-[state=true]:bg-gray-100">{e + 1}</button>
-                    )
-                })}
-            </div>
+        <div className="flex flex-col w-20">
+            <button onClick={onEdit} className="hover:bg-gray-200 h-8 text-sm text-gray-600 font-bold border-b border-b-gray-400 text-start px-2">EDIT</button>
+            {/* <button className="hover:bg-gray-200 h-8 text-sm text-gray-600 font-bold text-start px-2">delete</button> */}
         </div>
     )
 }
